@@ -1,0 +1,62 @@
+select count(username) -- total 100 users
+from ig_clone.users;
+
+-- Marketing team metrics
+
+SELECT * FROM ig_clone.users -- Top 5 oldest users (first question)
+order by created_at
+limit 5;
+
+select u.id, u.username FROM ig_clone.users u -- users without a single post (second question)
+left join photos p
+on u.id = p.user_id
+where p.image_url is null;
+
+select count(u.username) FROM ig_clone.users u -- count of usernames without a single post
+left join photos p
+on u.id = p.user_id
+where p.image_url is null;
+
+SELECT photo_id, count(user_id) as most_liked from ig_clone.likes -- most liked photo
+group by photo_id
+order by most_liked desc
+limit 1;
+
+Select u.username, user_id, image_url from ig_clone.photos p -- contest winner (third question)
+join users u on p.user_id = u.id
+where p.id= 145;
+
+select tag_name, tag_id, count(tag_id) as most_used_tasgs -- top 5 popular tags (Fourth question)
+from ig_clone.photo_tags pt 
+join tags t
+on pt.tag_id = t.id
+group by tag_name , tag_id
+order by count(tag_id) DESC
+LIMIT 5;
+
+select weekday(created_at) as most_active_weekday, count(*) as count_weekday from ig_clone.users -- launch campaign ads (Fifth question)
+group by most_active_weekday 
+order by count_weekday desc;
+
+-- Investor Metrics
+
+select count(distinct id)/100 from ig_clone.photos; -- post/total users
+select count(distinct id)/count(distinct user_id) as total_avg  from ig_clone.photos; -- post_per_active_user
+
+select username, user_id, count(photo_id) as max_liked  from ig_clone.users u -- bots & fake accounts
+left join likes l
+on u.id = l.user_id
+group by username, user_id
+having max_liked>=257;
+
+select count(*) -- 13 bots & fake accounts
+from(
+	select username, user_id, count(photo_id) as max_liked  from ig_clone.users u -- Total count of bots & fake accounts
+	left join likes l
+	on u.id = l.user_id
+	group by username, user_id
+	having max_liked>=257
+) a;
+
+
+
